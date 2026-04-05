@@ -648,6 +648,7 @@ function saveMemory() {
   } else {
     alert(`✅ ${w.toUpperCase()} 的记忆已保存`);
   }
+  void renderLearnWord(w);
 }
 
 function parseVocabText(name, content) {
@@ -765,6 +766,12 @@ async function renderLearnWord(word) {
   currentWord = word;
   const meaning = vocabNotes[word] || "（未收录释义）";
   const ipa = await getIpa(word);
+  const note = memoryNotes[word] || {};
+  const status = note.mastered
+    ? "已掌握（无谐音故事）"
+    : note.saved || note.homo || note.sentence
+      ? "已保存记忆"
+      : "未保存";
   selectedHomo = "";
   selectedStory = "";
   if (el.homoOptions) el.homoOptions.innerHTML = "";
@@ -772,6 +779,7 @@ async function renderLearnWord(word) {
   if (el.learnWordInfo) {
     el.learnWordInfo.textContent = [
       `当前背词：${word}`,
+      `状态：${status}`,
       `音标：${ipa}`,
       `释义：${meaning}`,
       `音节：${getSyllableDivision(word)}`,
