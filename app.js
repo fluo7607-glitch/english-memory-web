@@ -635,13 +635,19 @@ function saveMemory() {
 
   const chosenHomo = (document.querySelector("input[name='homoOption']:checked")?.value || selectedHomo || "").trim();
   const chosenStory = (document.querySelector("input[name='storyOption']:checked")?.value || selectedStory || "").trim();
-  if (!chosenHomo || !chosenStory) {
-    alert("请先生成候选并至少各选一条（谐音 + 小故事）");
-    return;
-  }
-  memoryNotes[w] = { homo: chosenHomo, sentence: chosenStory };
+  const plainSaved = !chosenHomo && !chosenStory;
+  memoryNotes[w] = {
+    homo: chosenHomo,
+    sentence: chosenStory,
+    saved: true,
+    mastered: plainSaved
+  };
   saveJSON(STORAGE_MEMORY, memoryNotes);
-  alert(`✅ ${w.toUpperCase()} 的记忆已保存`);
+  if (plainSaved) {
+    alert(`✅ ${w.toUpperCase()} 已保存为“已掌握（无需谐音故事）”`);
+  } else {
+    alert(`✅ ${w.toUpperCase()} 的记忆已保存`);
+  }
 }
 
 function parseVocabText(name, content) {
@@ -802,7 +808,7 @@ function nextLearn() {
 function dictWordPool() {
   const keys = Object.keys(memoryNotes || {}).filter((w) => {
     const n = memoryNotes[w] || {};
-    return /^[a-z-]+$/i.test(w) && String(n.homo || "").trim() && String(n.sentence || "").trim();
+    return /^[a-z-]+$/i.test(w) && (n.saved || String(n.homo || "").trim() || String(n.sentence || "").trim());
   });
   return keys.map((w) => w.toLowerCase());
 }
@@ -830,6 +836,19 @@ function setAudioTip(text) {
   el.audioTip.textContent = text;
 }
 
+function getProxySpeakUrl(word) {
+  const w = encodeURIComponent(String(word || "").trim().toLowerCase());
+  if (!w) return "";
+  const raw = String(appSettings.proxyUrl || "").trim();
+  if (!raw) return "";
+  let speakBase = raw;
+  if (speakBase.endsWith("/enhance")) speakBase = speakBase.slice(0, -"/enhance".length);
+  if (speakBase === "/enhance") speakBase = "";
+  // 兼容绝对/相对地址
+  const speakPath = `${speakBase}/speak?word=${w}`;
+  return speakPath;
+}
+
 function withTimeout(promise, ms) {
   return Promise.race([
     promise,
@@ -840,12 +859,16 @@ function withTimeout(promise, ms) {
 function getImmediateAudioCandidates(word) {
   const w = String(word || "").trim().toLowerCase();
   if (!w) return [];
-  return [
+  const urls = [];
+  const proxySpeak = getProxySpeakUrl(w);
+  if (proxySpeak) urls.push(proxySpeak);
+  urls.push(
     `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(w)}&type=2`,
     `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(w)}&type=1`,
     `https://api.dictionaryapi.dev/media/pronunciations/en/${encodeURIComponent(w)}-us.mp3`,
     `https://api.dictionaryapi.dev/media/pronunciations/en/${encodeURIComponent(w)}-uk.mp3`
-  ];
+  );
+  return urls;
 }
 
 async function getCloudAudioCandidates(word) {
@@ -1002,7 +1025,7 @@ function dictHint() {
   if (note.homo) hintParts.push(`谐音提示：${note.homo}`);
   if (note.sentence) hintParts.push(`故事提示：${note.sentence}`);
   if (!hintParts.length) {
-    el.dictStatus.textContent = "该词还没有已保存记忆，请先在第一块生成并保存。";
+    el.dictStatus.textContent = "这个词你保存为“已掌握”，未设置提示内容。可直接听写作答。";
     return;
   }
   const masked = hintParts.map((line) => maskAnswerInHint(line, word));
