@@ -97,6 +97,7 @@ let generationNonce = 0;
 let selectedHomo = "";
 let selectedStory = "";
 const ipaCache = {};
+const audioUrlCache = {};
 const learnState = { words: [], index: -1, current: "" };
 const dictationState = { words: [], index: -1, current: "" };
 
@@ -822,11 +823,87 @@ function pickBestVoice() {
   return voices.find((x) => (x.lang || "").toLowerCase().startsWith("en")) || voices[0];
 }
 
-function speakWord(word) {
-  if (!("speechSynthesis" in window)) {
-    alert("当前浏览器不支持语音朗读，请换 Chrome/Safari");
-    return;
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))
+  ]);
+}
+
+async function getCloudAudioCandidates(word) {
+  const w = String(word || "").trim().toLowerCase();
+  if (!w) return [];
+  if (audioUrlCache[w]) return audioUrlCache[w];
+  const urls = [];
+  // 高可用公共词典发音源（无需 key）
+  urls.push(`https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(w)}&type=2`);
+  urls.push(`https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(w)}&type=1`);
+  urls.push(`https://api.dictionaryapi.dev/media/pronunciations/en/${encodeURIComponent(w)}-us.mp3`);
+  urls.push(`https://api.dictionaryapi.dev/media/pronunciations/en/${encodeURIComponent(w)}-uk.mp3`);
+  try {
+    const resp = await withTimeout(
+      fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w)}`),
+      5000
+    );
+    if (resp.ok) {
+      const data = await resp.json();
+      const first = Array.isArray(data) ? data[0] : null;
+      const phonetics = first?.phonetics || [];
+      for (const p of phonetics) {
+        const u = String(p?.audio || "").trim();
+        if (u) urls.push(u);
+      }
+    }
+  } catch {
+    // ignore
   }
+  const unique = Array.from(new Set(urls.filter(Boolean)));
+  audioUrlCache[w] = unique;
+  return unique;
+}
+
+async function playAudioByUrl(url) {
+  return new Promise((resolve, reject) => {
+    const a = new Audio();
+    a.preload = "auto";
+    a.src = url;
+    const clean = () => {
+      a.onended = null;
+      a.onerror = null;
+      a.onabort = null;
+      a.oncanplaythrough = null;
+    };
+    a.onended = () => {
+      clean();
+      resolve(true);
+    };
+    a.onerror = () => {
+      clean();
+      reject(new Error("audio error"));
+    };
+    a.onabort = () => {
+      clean();
+      reject(new Error("audio abort"));
+    };
+    const start = () => {
+      const p = a.play();
+      if (p && typeof p.then === "function") {
+        p.catch((e) => {
+          clean();
+          reject(e);
+        });
+      }
+    };
+    a.oncanplaythrough = start;
+    setTimeout(() => {
+      // 某些浏览器不会触发 canplaythrough，主动尝试播放
+      start();
+    }, 200);
+  });
+}
+
+function speakWordByBrowser(word) {
+  if (!("speechSynthesis" in window)) return false;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(word);
   u.lang = "en-US";
@@ -836,6 +913,29 @@ function speakWord(word) {
   const v = pickBestVoice();
   if (v) u.voice = v;
   window.speechSynthesis.speak(u);
+  return true;
+}
+
+async function speakWord(word) {
+  const w = String(word || "").trim();
+  if (!w) return;
+  // 云端发音优先：安卓端更稳定
+  try {
+    const urls = await getCloudAudioCandidates(w);
+    for (const u of urls) {
+      try {
+        await withTimeout(playAudioByUrl(u), 8000);
+        return;
+      } catch {
+        // try next url
+      }
+    }
+  } catch {
+    // fallback below
+  }
+  if (!speakWordByBrowser(w)) {
+    alert("当前设备无法播放发音，请检查网络或更换浏览器。");
+  }
 }
 
 function startDictation() {
