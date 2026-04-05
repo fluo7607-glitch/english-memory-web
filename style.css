@@ -192,6 +192,17 @@ button.ghost {
   margin: 8px 0;
 }
 
+#pronounceAudio {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.audio-tip {
+  margin: 8px 0 10px;
+  color: #666;
+  font-size: 13px;
+}
+
 @media (max-width: 700px) {
   .hero h1 {
     font-size: 24px;
