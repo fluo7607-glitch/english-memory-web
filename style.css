@@ -1,0 +1,207 @@
+:root {
+  --bg: #fff7ef;
+  --panel: #ffffff;
+  --text: #2f2a33;
+  --accent: #ff5c8a;
+  --accent-2: #3897d3;
+  --line: #f2d8e1;
+  --ok: #2da66d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 10% 0%, #ffe9f0 0%, transparent 40%),
+    radial-gradient(circle at 100% 20%, #e8f8ff 0%, transparent 35%),
+    var(--bg);
+}
+
+.page {
+  width: min(960px, 92vw);
+  margin: 28px auto 40px;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.hero h1 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 32px;
+}
+
+.hero p {
+  margin: 8px 0 0;
+  color: var(--accent-2);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 14px;
+  box-shadow: 0 8px 24px rgba(255, 92, 138, 0.08);
+}
+
+h2,
+h3 {
+  margin: 0 0 12px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.row.right {
+  justify-content: flex-end;
+}
+
+input,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #e8d8de;
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  transform: scale(1.2);
+}
+
+#onlineStatusText {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.controls input {
+  flex: 1;
+  min-width: 220px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(0.95);
+}
+
+button.ghost {
+  background: #f4f4f4;
+  color: #444;
+}
+
+.result {
+  margin: 0;
+  background: #f5fff8;
+  border: 1px solid #d4f0df;
+  border-radius: 10px;
+  padding: 12px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  min-height: 96px;
+}
+
+.tips p {
+  margin: 6px 0;
+}
+
+.option-panel {
+  margin-top: 12px;
+  padding: 12px;
+  background: #fffdf6;
+}
+
+.option-item {
+  display: block;
+  padding: 8px 10px;
+  margin: 6px 0;
+  border: 1px solid #ecdcc3;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #fff;
+}
+
+.option-item input {
+  width: auto;
+  margin-right: 8px;
+}
+
+#reviewDialog {
+  width: min(760px, 90vw);
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+}
+
+#reviewDialog::backdrop {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.review-card {
+  padding: 16px;
+}
+
+.review-card header,
+.review-card footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-card footer {
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.hint {
+  color: var(--accent-2);
+  margin: 8px 0;
+}
+
+@media (max-width: 700px) {
+  .hero h1 {
+    font-size: 24px;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .row.right {
+    justify-content: stretch;
+  }
+}

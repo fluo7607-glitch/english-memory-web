@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>可爱英语3500词记忆助手（网页版）</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <h1>可爱高中英语3500词记忆助手</h1>
+        <p>背单词 + 复习错题 + 查词分析</p>
+      </header>
+
+      <section class="panel" id="learnSection">
+        <h2>第一块：背单词</h2>
+        <div class="row">
+          <button id="importGaokaoBtn">一键导入高考词库</button>
+          <button id="learnStartBtn">开始背词</button>
+          <button id="learnNextBtn">下一个单词</button>
+          <button id="learnSpeakBtn">读音</button>
+          <button id="learnGenerateBtn">生成谐音和故事</button>
+          <button id="learnRegenerateBtn">换一版</button>
+        </div>
+        <pre id="learnWordInfo" class="result">先点击“一键导入高考词库”，再点击“开始背词”。</pre>
+
+        <h3>谐音记忆候选（点击即选为专属）</h3>
+        <div id="homoOptions"></div>
+        <h3>记忆小故事候选（点击即选为专属）</h3>
+        <div id="storyOptions"></div>
+
+        <div class="row right">
+          <button id="saveBtn">保存当前单词记忆</button>
+        </div>
+      </section>
+
+      <section class="panel" id="reviewSection">
+        <h2>第二块：复习单词 + 错题本</h2>
+        <div class="row">
+          <button id="dictStartBtn">开始听写</button>
+          <button id="dictSpeakBtn">读单词</button>
+          <button id="dictHintBtn">给提示</button>
+          <button id="wrongBookBtn">打开错题本</button>
+        </div>
+        <label for="dictInput">输入你听到的单词拼写</label>
+        <input id="dictInput" type="text" placeholder="例如：ability" />
+        <div class="row">
+          <button id="dictCheckBtn">提交答案</button>
+          <button id="dictNextBtn">下一题</button>
+        </div>
+        <pre id="dictStatus" class="result">点击“开始听写”开始复习。</pre>
+      </section>
+
+      <section class="panel" id="lookupSection">
+        <h2>第三块：查单词</h2>
+        <label for="wordInput">输入单词</label>
+        <div class="row">
+          <input id="wordInput" type="text" placeholder="例如：abandon" />
+          <button id="analyzeBtn">分析这个词</button>
+          <button id="homoBtn">生成谐音(查词模式)</button>
+          <button id="importBtn">导入外部词库</button>
+          <input id="vocabFileInput" type="file" accept=".json,.csv,.txt" hidden />
+        </div>
+        <pre id="resultBox" class="result">这里会显示查词结果...</pre>
+      </section>
+
+      <section class="panel">
+        <h2>联网增强模式</h2>
+        <div class="row">
+          <label for="onlineModeToggle">启用联网增强</label>
+          <input id="onlineModeToggle" type="checkbox" />
+        </div>
+        <label for="proxyUrlInput">代理接口地址</label>
+        <input id="proxyUrlInput" type="text" value="/enhance" />
+        <p id="onlineStatusText">当前：本地模式（未联网）</p>
+      </section>
+    </main>
+
+    <script src="./gaokao_3500_vocab.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
